@@ -19,16 +19,39 @@ namespace SnakeWPF
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-
+    
     public class SnakePart
     {
-        public UIElement UIElement { get; set; }
+        public UIElement UiElement { get; set; }
         public Point Position { get; set; }
         public bool IsHead { get; set; }
     }
     public partial class MainWindow : Window
     {
         const int SnakeSquareSize = 25;
+        private SolidColorBrush snakeBodyBrush = Brushes.Purple;
+        private SolidColorBrush snakeHeadBrush = Brushes.MediumPurple;
+        private List<SnakePart> snakeParts = new List<SnakePart>();
+
+        private void DrawSnake()
+        {
+            foreach(SnakePart snakePart in snakeParts)
+            {
+                if(snakePart.UiElement == null)
+                {
+                    snakePart.UiElement = new Rectangle()
+                    {
+                        Width = SnakeSquareSize,
+                        Height = SnakeSquareSize,
+                        Fill = (snakePart.IsHead ? snakeHeadBrush : snakeBodyBrush)
+                    };
+
+                    GameArea.Children.Add(snakePart.UiElement);
+                    Canvas.SetTop(snakePart.UiElement, snakePart.Position.Y);
+                    Canvas.SetLeft(snakePart.UiElement, snakePart.Position.X);
+                }
+            }
+        }
         public MainWindow()
         {
             InitializeComponent();
