@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -46,6 +47,7 @@ namespace SnakeWPF
         private List<SnakePart> snakeParts = new List<SnakePart>();
         private UIElement snakeFood = null;
         private SolidColorBrush foodBrush = Brushes.Red;
+        private bool GameEnded = false;
 
         public enum SnakeDirection { Left, Right, Up, Down };
         private SnakeDirection snakeDirection = SnakeDirection.Right;
@@ -189,6 +191,16 @@ namespace SnakeWPF
             {
                 MoveSnake();
             }
+
+            if(GameEnded == true)
+            {
+                switch(e.Key)
+                {
+                    case Key.Space:
+                        StartNewGame();
+                        break;
+                }
+            }
         }
 
         private Point GetNextFoodPosition()
@@ -285,6 +297,7 @@ namespace SnakeWPF
         {
             gameTickTimer.IsEnabled = false;
             MessageBox.Show("Fim de jogo! \n\nPara começar um novo jogo pressione a barra de espaço", "SnakeWPF");
+            GameEnded = true;
         }
         
     }
