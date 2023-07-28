@@ -50,6 +50,7 @@ namespace SnakeWPF
         public enum SnakeDirection { Left, Right, Up, Down };
         private SnakeDirection snakeDirection = SnakeDirection.Right;
         private int snakeLength;
+        private int currentScore = 0;
 
         private void StartNewGame()
         {
@@ -61,6 +62,31 @@ namespace SnakeWPF
             DrawSnake();
             DrawSnakeFood();
             gameTickTimer.IsEnabled = true;
+        }
+
+        private void DoCollisionCheck()
+        {
+            SnakePart snakeHead = snakeParts[snakeParts.Count - 1];
+
+            if((snakeHead.Position.X == Canvas.GetLeft(snakeFood)) && (snakeHead.Position.Y == Canvas.GetTop(snakeFood)))
+            {
+                EatSnakeFood();
+                return;
+            }
+
+            if((snakeHead.Position.Y < 0) || (snakeHead.Position.Y >= GameArea.ActualHeight) || (snakeHead.Position.X < 0) || (snakeHead.Position.X >= GameArea.ActualWidth))
+            {
+                EndGame();
+            }
+
+            foreach(SnakePart snakeBodyPart in snakeParts.Take(snakeParts.Count - 1))
+            {
+                if((snakeHead.Position.X == snakeBodyPart.Position.X) && (snakeHead.Position.Y == snakeBodyPart.Position.Y))
+                {
+                    EndGame();
+                }
+            }
+
         }
 
         private void DrawSnake()
@@ -124,7 +150,7 @@ namespace SnakeWPF
             });
 
             DrawSnake();
-            //DoCollisionCheck();
+            DoCollisionCheck();
         }
         private void Window_KeyUp(object sender, KeyEventArgs e)
         {
@@ -185,13 +211,17 @@ namespace SnakeWPF
 
         }
 
-
-        private void Window_ContentRendered(object sender, EventArgs e)
+        private void EatSnakeFood()
         {
-            DrawGameArea();
-            StartNewGame();
-        }
+            snakeLength++;
+            currentScore++;
+            int timerInterval = Math.Max(SnakeSpeedThreshold, (int)gameTickTimer.Interval.TotalMilliseconds - (currentScore * 2));
+            gameTickTimer.Interval = TimeSpan.FromMilliseconds(timerInterval);
+            GameArea.Children.Remove(snakeFood);
+            DrawSnakeFood();
+            UpdateGameStatus();
 
+        }
         private void DrawGameArea()
         {
             bool doneDrawingBackground = false;
@@ -228,7 +258,23 @@ namespace SnakeWPF
                 }
             }
         }
-        
+
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
+            DrawGameArea();
+            StartNewGame();
+        }
+
+        private void UpdateGameStatus()
+        {
+            this.Title = "SnakeWPF - Score: " + currentScore + " - Game speed: " + gameTickTimer.Interval.TotalMilliseconds;
+        }        
+
+        private void EndGame()
+        {
+            gameTickTimer.IsEnabled = false;
+            MessageBox.Show("Fim de jogo! \n\nPara começar um novo jogo pressione a barra de espaço", "SnakeWPF");
+        }
         
     }
 }
