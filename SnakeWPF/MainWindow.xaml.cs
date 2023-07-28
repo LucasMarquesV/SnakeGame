@@ -296,7 +296,7 @@ namespace SnakeWPF
         private void EndGame()
         {
             gameTickTimer.IsEnabled = false;
-            MessageBox.Show("Fim de jogo! \n\nPara começar um novo jogo pressione a barra de espaço", "SnakeWPF");
+            MessageBox.Show("Fim de jogo! \n\nPara começar um novo jogo pressione a barra de espaço duas vezes", "SnakeWPF");
             GameEnded = true;
         }
         
