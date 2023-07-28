@@ -60,14 +60,18 @@ namespace SnakeWPF
             }
             snakeParts.Clear();
             if (snakeFood != null) GameArea.Children.Remove(snakeFood);
-          
+            currentScore = 0;          
             snakeLength = SnakeStartLength;
+
             snakeDirection = SnakeDirection.Right;
             snakeParts.Add(new SnakePart() { Position = new Point(SnakeSquareSize * 5, SnakeSquareSize * 5) });
             gameTickTimer.Interval = TimeSpan.FromMilliseconds(SnakeStartSpeed);
 
             DrawSnake();
             DrawSnakeFood();
+
+            UpdateGameStatus();
+
             gameTickTimer.IsEnabled = true;
         }
 
