@@ -126,6 +126,33 @@ namespace SnakeWPF
             DrawSnake();
             //DoCollisionCheck();
         }
+        private void Window_KeyUp(object sender, KeyEventArgs e)
+        {
+            SnakeDirection originalSnakeDIrection = snakeDirection;
+            switch (e.Key)
+            {
+                case Key.Up:
+                    if (snakeDirection != SnakeDirection.Down)
+                        snakeDirection = SnakeDirection.Up;
+                    break;
+                case Key.Down:
+                    if (snakeDirection != SnakeDirection.Up)
+                        snakeDirection = SnakeDirection.Down;
+                    break;
+                case Key.Left:
+                    if (snakeDirection != SnakeDirection.Right)
+                        snakeDirection = SnakeDirection.Left;
+                    break;
+                case Key.Right:
+                    if (snakeDirection != SnakeDirection.Left)
+                        snakeDirection = SnakeDirection.Right;
+                    break;
+            }
+            if(snakeDirection == originalSnakeDIrection)
+            {
+                MoveSnake();
+            }
+        }
 
         private Point GetNextFoodPosition()
         {
@@ -201,5 +228,7 @@ namespace SnakeWPF
                 }
             }
         }
+        
+        
     }
 }
