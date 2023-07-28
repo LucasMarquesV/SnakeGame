@@ -15,14 +15,14 @@ using System.Windows.Shapes;
 using System.Xml;
 
 namespace SnakeWPF
-{   
+{
     public class SnakePart
     {
         public UIElement UiElement { get; set; }
         public Point Position { get; set; }
         public bool IsHead { get; set; }
     }
-       public partial class MainWindow : Window
+    public partial class MainWindow : Window
     {
         private System.Windows.Threading.DispatcherTimer gameTickTimer = new System.Windows.Threading.DispatcherTimer();
         public MainWindow()
@@ -30,21 +30,24 @@ namespace SnakeWPF
             InitializeComponent();
             gameTickTimer.Tick += GameTickTimer_Tick;
         }
-        
+
         private void GameTickTimer_Tick(object sender, EventArgs e)
         {
             MoveSnake();
         }
-       
+
         const int SnakeSquareSize = 20;
         const int SnakeStartLength = 3;
         const int SnakeStartSpeed = 400;
         const int SnakeSpeedThreshold = 100;
+        private Random rnd = new Random();
         private SolidColorBrush snakeBodyBrush = Brushes.MediumPurple;
         private SolidColorBrush snakeHeadBrush = Brushes.Purple;
         private List<SnakePart> snakeParts = new List<SnakePart>();
+        private UIElement snakeFood = null;
+        private SolidColorBrush foodBrush = Brushes.Red;
 
-        public enum SnakeDirection { Left, Right, Up, Down};
+        public enum SnakeDirection { Left, Right, Up, Down };
         private SnakeDirection snakeDirection = SnakeDirection.Right;
         private int snakeLength;
 
@@ -56,14 +59,15 @@ namespace SnakeWPF
             gameTickTimer.Interval = TimeSpan.FromMilliseconds(SnakeStartSpeed);
 
             DrawSnake();
+            DrawSnakeFood();
             gameTickTimer.IsEnabled = true;
         }
 
         private void DrawSnake()
         {
-            foreach(SnakePart snakePart in snakeParts)
+            foreach (SnakePart snakePart in snakeParts)
             {
-                if(snakePart.UiElement == null)
+                if (snakePart.UiElement == null)
                 {
                     snakePart.UiElement = new Rectangle()
                     {
@@ -78,15 +82,15 @@ namespace SnakeWPF
                 }
             }
         }
-        
+
         private void MoveSnake()
         {
-        while(snakeParts.Count >= snakeLength)
+            while (snakeParts.Count >= snakeLength)
             {
                 GameArea.Children.Remove(snakeParts[0].UiElement);
                 snakeParts.RemoveAt(0);
             }
-        foreach(SnakePart snakePart in snakeParts)
+            foreach (SnakePart snakePart in snakeParts)
             {
                 (snakePart.UiElement as Rectangle).Fill = snakeBodyBrush;
                 snakePart.IsHead = false;
@@ -94,13 +98,13 @@ namespace SnakeWPF
             SnakePart snakeHead = snakeParts[snakeParts.Count - 1];
             double nextX = snakeHead.Position.X;
             double nextY = snakeHead.Position.Y;
-            switch(snakeDirection)
+            switch (snakeDirection)
             {
                 case SnakeDirection.Left:
                     nextX -= SnakeSquareSize;
                     break;
 
-                    case SnakeDirection.Right:
+                case SnakeDirection.Right:
                     nextX += SnakeSquareSize;
                     break;
 
@@ -123,22 +127,53 @@ namespace SnakeWPF
             //DoCollisionCheck();
         }
 
-        
-        private void Window_ContentRendered (object sender, EventArgs e)
+        private Point GetNextFoodPosition()
+        {
+            int maxX = (int)(GameArea.ActualWidth / SnakeSquareSize);
+            int maxY = (int)(GameArea.ActualHeight / SnakeSquareSize);
+            int foodX = rnd.Next(0, maxX) * SnakeSquareSize;
+            int foodY = rnd.Next(0, maxY) * SnakeSquareSize;
+
+            foreach (SnakePart snakePart in snakeParts)
+            {
+                if ((snakePart.Position.X == foodX) && (snakePart.Position.Y == foodY))
+                    return GetNextFoodPosition();
+            }
+
+            return new Point(foodX, foodY);
+        }
+
+        private void DrawSnakeFood()
+        {
+            Point foodPosition = GetNextFoodPosition();
+            snakeFood = new Ellipse()
+            {
+                Width = SnakeSquareSize,
+                Height = SnakeSquareSize,
+                Fill = foodBrush
+            };
+            GameArea.Children.Add(snakeFood);
+            Canvas.SetTop(snakeFood, foodPosition.Y);
+            Canvas.SetLeft(snakeFood, foodPosition.X);
+
+        }
+
+
+        private void Window_ContentRendered(object sender, EventArgs e)
         {
             DrawGameArea();
             StartNewGame();
         }
-        
+
         private void DrawGameArea()
         {
             bool doneDrawingBackground = false;
             int nextX = 0, nextY = 0;
             int rowCounter = 0;
             bool nextIsOdd = false;
-            
 
-        while(doneDrawingBackground == false)
+
+            while (doneDrawingBackground == false)
             {
                 Rectangle rect = new Rectangle
                 {
@@ -152,7 +187,7 @@ namespace SnakeWPF
 
                 nextIsOdd = !nextIsOdd;
                 nextX += SnakeSquareSize;
-                if(nextX >= GameArea.ActualWidth)
+                if (nextX >= GameArea.ActualWidth)
                 {
                     nextX = 0;
                     nextY += SnakeSquareSize;
@@ -160,7 +195,7 @@ namespace SnakeWPF
                     nextIsOdd = (rowCounter % 2 != 0);
                 }
 
-                if(nextY >= GameArea.ActualHeight)
+                if (nextY >= GameArea.ActualHeight)
                 {
                     doneDrawingBackground = true;
                 }
